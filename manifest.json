@@ -1,0 +1,16 @@
+{
+  "name": "パグの世界 ～PUGS OF PUZZLE～",
+  "short_name": "パグの世界",
+  "description": "パグたちが暮らすファンタジー世界を、おやつパズルで冒険するRPG。",
+  "lang": "ja",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#BDE7FF",
+  "theme_color": "#BDE7FF",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

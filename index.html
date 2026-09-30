@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>パグの世界 ～PUGS OF PUZZLE～</title>
+  <meta name="description" content="パグたちが暮らすファンタジー世界を、おやつパズルで冒険するRPG。">
+  <meta name="theme-color" content="#BDE7FF">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="パグの世界">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&family=Mochiy+Pop+One&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= タイトル ================= -->
+  <section id="screen-title" class="screen">
+    <canvas id="title-canvas" class="title-canvas" aria-hidden="true"></canvas>
+    <header class="title-logo">
+      <h1 class="logo"><span class="logo-main">パグの世界</span><span class="logo-sub">PUGS OF PUZZLE</span></h1>
+      <p class="title-lead">おやつをそろえて、しあわせの骨をさがす旅へ</p>
+    </header>
+    <nav class="title-menu">
+      <button class="btn btn-big" data-action="title-new" id="btn-new">冒険をはじめる</button>
+      <button class="btn btn-big hidden" data-action="title-continue" id="btn-continue">つづきから</button>
+      <div class="menu-row">
+        <button class="btn btn-sub hidden" data-action="title-new" id="btn-renew">はじめから</button>
+        <button class="btn btn-sub js-sound" data-action="sound">音 ON</button>
+      </div>
+    </nav>
+  </section>
+
+  <!-- ================= キャラクター作成 ================= -->
+  <section id="screen-create" class="screen hidden">
+    <h2 class="screen-title">きみのパグ</h2>
+    <canvas id="create-preview" class="create-preview" width="300" height="300" aria-hidden="true"></canvas>
+    <div class="create-form">
+      <label class="field-label" for="hero-name">なまえ</label>
+      <input id="hero-name" class="text-input" type="text" maxlength="8" placeholder="8文字まで" enterkeyhint="done" autocomplete="off">
+      <p class="field-label">毛の色</p>
+      <div class="chips" id="coat-chips" role="radiogroup" aria-label="毛の色"></div>
+      <p class="field-label">首輪</p>
+      <div class="chips" id="collar-chips" role="radiogroup" aria-label="首輪の色"></div>
+    </div>
+    <div class="create-actions">
+      <button class="btn btn-quiet" data-action="to-title">もどる</button>
+      <button class="btn btn-primary" data-action="create-done">この子で冒険にでる</button>
+    </div>
+  </section>
+
+  <!-- ================= パグの村 ================= -->
+  <section id="screen-village" class="screen hidden">
+    <div class="village-scene">
+      <canvas id="village-canvas" class="village-canvas" aria-hidden="true"></canvas>
+      <p class="place-name">パグの村</p>
+    </div>
+    <div class="status-card">
+      <div class="status-head">
+        <span id="st-name" class="st-name"></span>
+        <span id="st-lv" class="st-lv"></span>
+      </div>
+      <div class="bar bar-exp" aria-hidden="true"><i id="st-exp"></i></div>
+      <dl class="st-grid">
+        <div><dt>HP</dt><dd id="st-hp"></dd></div>
+        <div><dt>こうげき</dt><dd id="st-atk"></dd></div>
+        <div><dt>ぼうぎょ</dt><dd id="st-def"></dd></div>
+        <div><dt>骨の欠片</dt><dd id="st-bone"></dd></div>
+      </dl>
+    </div>
+    <nav class="village-menu">
+      <button class="btn btn-primary btn-go" data-action="open-map">冒険にでる</button>
+      <button class="btn" data-action="open-mochi" id="btn-mochi">モチとすごす</button>
+      <button class="btn" data-action="open-elder">ゴンじいと話す</button>
+      <button class="btn" data-action="open-bag">おやつ袋</button>
+      <button class="btn" data-action="open-zukan">図鑑</button>
+      <button class="btn btn-quiet" data-action="open-settings">せってい</button>
+    </nav>
+  </section>
+
+  <!-- ================= バトル ================= -->
+  <section id="screen-battle" class="screen hidden">
+    <header class="bhud">
+      <div class="side side-hero">
+        <canvas id="hero-face" class="face" width="144" height="144" aria-hidden="true"></canvas>
+        <div class="side-info">
+          <span id="hud-hero-name" class="side-name"></span>
+          <div class="bar bar-hp" role="img" id="hud-hp-bar" aria-label="HP"><i id="hud-hp"></i><b id="hud-shield"></b></div>
+          <span class="bar-num"><span id="hud-hp-num"></span><span id="hud-shield-num" class="shield-num"></span></span>
+        </div>
+      </div>
+      <div class="next-box">
+        <span class="next-label">つぎ</span>
+        <canvas id="next-canvas" width="96" height="96" aria-label="次のブロック"></canvas>
+      </div>
+      <div class="side side-enemy">
+        <div class="side-info">
+          <span id="hud-enemy-name" class="side-name"></span>
+          <div class="bar bar-enemy" role="img" id="hud-enemy-bar" aria-label="敵のHP"><i id="hud-enemy"></i></div>
+          <span class="bar-num" id="hud-enemy-num"></span>
+        </div>
+        <div class="enemy-face-wrap">
+          <canvas id="enemy-face" class="face" width="144" height="144" aria-hidden="true"></canvas>
+          <svg class="timer-ring" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" id="enemy-timer"/></svg>
+          <span id="enemy-shout" class="enemy-shout"></span>
+        </div>
+      </div>
+    </header>
+
+    <div id="board-wrap" class="board-wrap">
+      <canvas id="board-canvas"></canvas>
+      <div id="say" class="say" aria-live="polite">
+        <canvas id="say-face" width="96" height="96" aria-hidden="true"></canvas>
+        <p id="say-text"></p>
+      </div>
+      <div id="combo-pop" class="combo-pop"></div>
+      <div id="dmg-layer" class="dmg-layer"></div>
+    </div>
+
+    <footer class="controls">
+      <button class="ctl" data-hold="left" aria-label="左へ">
+        <svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></button>
+      <button class="ctl" data-hold="right" aria-label="右へ">
+        <svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></button>
+      <button class="ctl" data-hold="down" aria-label="ゆっくり落とす／長押し">
+        <svg viewBox="0 0 24 24"><path d="M12 5v13M6 12l6 6 6-6"/></svg></button>
+      <button class="ctl" data-ctl="rotate" aria-label="回転">
+        <svg viewBox="0 0 24 24"><path d="M18.5 9A7 7 0 1 0 19 14"/><path d="M19 4v5h-5"/></svg></button>
+      <button class="ctl ctl-skill" data-ctl="skill" id="btn-skill" aria-label="モチのスキル いただきます">
+        <canvas id="skill-face" width="80" height="80" aria-hidden="true"></canvas>
+        <span class="skill-gauge"><i id="skill-gauge"></i></span>
+      </button>
+      <button class="ctl ctl-pause" data-ctl="pause" aria-label="一時停止">
+        <svg viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></svg></button>
+    </footer>
+  </section>
+
+  <!-- ================= 会話 ================= -->
+  <div id="dialog" class="dialog hidden" role="dialog" aria-live="polite">
+    <div class="dialog-box">
+      <canvas id="dialog-face" class="dialog-face" width="200" height="200" aria-hidden="true"></canvas>
+      <p id="dialog-name" class="dialog-name"></p>
+      <p id="dialog-text" class="dialog-text"></p>
+      <div id="dialog-choices" class="dialog-choices"></div>
+      <span class="dialog-next" aria-hidden="true">▼</span>
+      <button class="dialog-skip" data-action="story-skip">スキップ</button>
+    </div>
+  </div>
+
+  <!-- ================= オーバーレイ ================= -->
+  <div id="ov-pause" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+    <div class="panel">
+      <h2 id="pause-title" class="panel-title">ひと休み</h2>
+      <p class="panel-note">モチがおやつをつまみ食いしています</p>
+      <div class="panel-buttons">
+        <button class="btn btn-primary" data-action="resume">つづける</button>
+        <button class="btn js-sound" data-action="sound">音 ON</button>
+        <button class="btn btn-quiet" data-action="retreat">村にもどる</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="ov-result" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="result-title">
+    <div class="panel panel-result">
+      <h2 id="result-title" class="panel-title"></h2>
+      <canvas id="result-face" class="result-face" width="220" height="220" aria-hidden="true"></canvas>
+      <p id="result-msg" class="panel-note"></p>
+      <dl class="stats" id="result-stats"></dl>
+      <div id="result-treats" class="treat-row"></div>
+      <p id="result-lv" class="result-lv hidden"></p>
+      <div class="panel-buttons">
+        <button class="btn btn-primary" data-action="result-village">村にもどる</button>
+        <button class="btn" data-action="result-retry" id="btn-retry">もう一度ちょうせん</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="ov-map" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="map-title">
+    <div class="panel panel-map">
+      <h2 id="map-title" class="panel-title">パグの世界</h2>
+      <ol id="map-list" class="map-list"></ol>
+      <button class="btn btn-quiet" data-action="close">とじる</button>
+    </div>
+  </div>
+
+  <div id="ov-mochi" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="mochi-title">
+    <div class="panel">
+      <h2 id="mochi-title" class="panel-title">モチとすごす</h2>
+      <canvas id="mochi-face" class="mochi-face" width="220" height="220" aria-hidden="true"></canvas>
+      <p class="love-line"><span id="love-label"></span><span id="love-hearts" class="hearts"></span></p>
+      <div class="bar bar-love" aria-hidden="true"><i id="love-bar"></i></div>
+      <p id="love-next" class="panel-note"></p>
+      <p class="panel-sub">おやつをあげる（好物はクッキー）</p>
+      <div id="give-list" class="give-list"></div>
+      <div class="panel-buttons">
+        <button class="btn btn-primary" data-action="talk-mochi">おしゃべりする</button>
+        <button class="btn btn-quiet" data-action="close">とじる</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="ov-bag" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="bag-title">
+    <div class="panel">
+      <h2 id="bag-title" class="panel-title">おやつ袋</h2>
+      <p class="panel-note">冒険で消した中サイズ以上のおやつが入ります。食べると経験値になります。</p>
+      <div id="bag-list" class="give-list"></div>
+      <button class="btn btn-quiet" data-action="close">とじる</button>
+    </div>
+  </div>
+
+  <div id="ov-zukan" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="zukan-title">
+    <div class="panel panel-zukan">
+      <h2 id="zukan-title" class="panel-title">図鑑</h2>
+      <div class="tabs" role="tablist">
+        <button class="tab is-on" role="tab" data-tab="pugs" aria-selected="true">パグ</button>
+        <button class="tab" role="tab" data-tab="treats" aria-selected="false">おやつ</button>
+      </div>
+      <p class="zukan-count" id="zukan-count"></p>
+      <div id="zukan-grid" class="zukan-grid"></div>
+      <button class="btn btn-quiet" data-action="close">とじる</button>
+    </div>
+  </div>
+
+  <div id="ov-detail" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="detail-name">
+    <div class="panel panel-detail">
+      <canvas id="detail-canvas" class="detail-canvas" width="280" height="280" aria-hidden="true"></canvas>
+      <p id="detail-kind" class="detail-kind"></p>
+      <h3 id="detail-name" class="detail-name"></h3>
+      <p id="detail-rarity" class="detail-rarity"></p>
+      <p id="detail-desc" class="detail-desc"></p>
+      <dl id="detail-meta" class="detail-meta"></dl>
+      <button class="btn btn-primary" data-action="close">とじる</button>
+    </div>
+  </div>
+
+  <div id="ov-settings" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="panel">
+      <h2 id="settings-title" class="panel-title">せってい</h2>
+      <div class="panel-buttons">
+        <button class="btn js-sound" data-action="sound">音 ON</button>
+        <button class="btn" data-action="howto">操作のおさらい</button>
+        <button class="btn btn-danger" data-action="reset-save">セーブデータを消す</button>
+        <button class="btn btn-quiet" data-action="close">とじる</button>
+      </div>
+      <p class="panel-note small">データはこの端末のブラウザに保存されます</p>
+    </div>
+  </div>
+
+  <div id="ov-howto" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="howto-title">
+    <div class="panel">
+      <h2 id="howto-title" class="panel-title">操作のおさらい</h2>
+      <dl class="howto-list">
+        <div><dt>左右ドラッグ</dt><dd>ブロックを1マスずつ動かす</dd></div>
+        <div><dt>タップ</dt><dd>回転</dd></div>
+        <div><dt>下へはらう</dt><dd>一気に落とす</dd></div>
+        <div><dt>同じおやつ3つ</dt><dd>くっつくと融合して大きくなる</dd></div>
+        <div><dt>横一列</dt><dd>クッキー＝こうげき／ほね＝ガード／キャンディ＝かいふく</dd></div>
+        <div><dt>いちばん大きいおやつ3つ</dt><dd>バースト！とても強い</dd></div>
+        <div><dt>キーボード</dt><dd>← → ↓ 移動／↑ 回転／スペース 落とす／C スキル／P 一時停止</dd></div>
+      </dl>
+      <button class="btn btn-primary" data-action="close">とじる</button>
+    </div>
+  </div>
+
+  <div id="ov-confirm" class="overlay hidden" role="dialog" aria-modal="true">
+    <div class="panel panel-sm">
+      <p id="confirm-text" class="confirm-text"></p>
+      <div class="panel-row">
+        <button class="btn" data-action="confirm-no">やめる</button>
+        <button class="btn btn-primary" data-action="confirm-yes" id="confirm-yes">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="banner" class="banner" aria-live="polite"><strong id="banner-main"></strong><span id="banner-sub"></span></div>
+  <div id="cutin" class="cutin" aria-hidden="true"><canvas id="cutin-face" width="240" height="240"></canvas><span>いただきます！</span></div>
+  <div id="screen-flash" class="screen-flash" aria-hidden="true"></div>
+  <div id="toast" class="toast" aria-live="polite"></div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="data/characters.js"></script>
+<script src="data/items.js"></script>
+<script src="data/stages.js"></script>
+<script src="data/story.js"></script>
+<script src="js/save.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/pugArt.js"></script>
+<script src="js/treatArt.js"></script>
+<script src="js/backgrounds.js"></script>
+<script src="js/puzzle.js"></script>
+<script src="js/battle.js"></script>
+<script src="js/story.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
